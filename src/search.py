@@ -1,3 +1,9 @@
+import os
+from dotenv import load_dotenv
+
+from langchain_postgres import PGVector
+from langchain_huggingface import HuggingFaceEmbeddings
+
 PROMPT_TEMPLATE = """
 CONTEXTO:
 {contexto}
@@ -25,5 +31,40 @@ PERGUNTA DO USUÁRIO:
 RESPONDA A "PERGUNTA DO USUÁRIO"
 """
 
+load_dotenv()
+
+for k in [
+        "OPENAI_API_KEY",
+        "HF_TOKEN",
+        "DATABASE_URL",
+        "PG_VECTOR_COLLECTION_NAME"
+]:
+
+    if not os.getenv(k):
+        raise ValueError(f"{k} is not set in the environment variables")
+
+PG_VECTOR_COLLECTION = os.getenv("PG_VECTOR_COLLECTION_NAME")
+DATABASE_URL = os.getenv("DATABASE_URL")
+EMBEDDINGS = HuggingFaceEmbeddings(
+    model_name="sentence-transformers/all-MiniLM-L6-v2")
+
+
+def __similarity_search(query: str, top_k: int = 5) -> list[str]:
+    try:
+        pg_vector = PGVector(
+            collection_name=PG_VECTOR_COLLECTION,
+            connection=DATABASE_URL,
+            embeddings=EMBEDDINGS,
+            use_jsonb=True
+        )
+        results = pg_vector.similarity_search(query, top_k=top_k)
+        return [result.page_content for result in results]
+    except Exception as e:
+        print(f"Error during similarity search: {e}")
+        return []
+
+
 def search_prompt(question=None):
-    pass
+    contexto = "\n\n".join(__similarity_search(question))
+    prompt = PROMPT_TEMPLATE.format(contexto=contexto, pergunta=question)
+    return prompt

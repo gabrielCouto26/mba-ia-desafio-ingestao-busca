@@ -59,8 +59,8 @@ def __load_and_split(pdf_path: str) -> list[Document]:
             raise Exception("Failed to load document")
 
         splitted = RecursiveCharacterTextSplitter(
-            chunk_size=500,
-            chunk_overlap=100,
+            chunk_size=1000,
+            chunk_overlap=150,
             add_start_index=False
         ).split_documents(doc)
 

@@ -73,3 +73,9 @@ typing_extensions==4.15.0
 urllib3==2.5.0
 yarl==1.20.1
 zstandard==0.24.0
+
+# --- HuggingFaceEmbeddings ---
+transformers
+torch
+langchain-huggingface
+sentence-transformers

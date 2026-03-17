@@ -57,7 +57,7 @@ def __similarity_search(query: str, top_k: int = 5) -> list[str]:
             embeddings=EMBEDDINGS,
             use_jsonb=True
         )
-        results = pg_vector.similarity_search(query, top_k=top_k)
+        results = pg_vector.similarity_search(query, top_k=10)
         return [result.page_content for result in results]
     except Exception as e:
         print(f"Error during similarity search: {e}")
